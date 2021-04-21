@@ -66,7 +66,7 @@ params=""
 for arg in $@; do
   if [[ -z $arg || $arg == $1 ]]; then continue; fi
   if [[ $arg == "-r" ]]; then remove=false; continue; fi
-  if [[ $arg == "-np" ]]; then params="-fno-stack-protector -z execstack -no-pie $params"; continue; fi
+  if [[ $arg == "-np" ]]; then params="$params -fno-stack-protector -z execstack -no-pie"; continue; fi
   params="$params $arg"
 done
 
