@@ -8,7 +8,8 @@ function stop {
 
 function C_compile {
   local output=$(sed 's|\.\w*$||' <<< $1)
-  $2 $1 -o $output
+  $2 $1 -o $output $params
+  $cmd
   if [[ ! -f $output ]]; then return; fi
   chmod +x $output
   execute $output
@@ -48,14 +49,25 @@ if [[ -z $1 ]]; then
   stop
 fi
 if [[ ! -f $1 ]]; then
+  if [[ $1 == "-h" ]]; then
+    echo "$0 [source file | -h] [args...]"
+    echo -e "\t-h       : show this help"
+    echo -e "\t-r       : don't remove binary file after execution"
+    echo -e "\t-np      : disable protections"
+    echo -e "\t<others> : add arguments to compilation step"
+    stop
+  fi
   echo "Ce fichier n'existe pas : '$1'"
   stop
 fi
 
 remove=true
+params=""
 for arg in $@; do
-  if [[ -z $arg ]]; then continue; fi
-  if [[ $arg == "-r" ]]; then remove=false; echo "rem false"; fi
+  if [[ -z $arg || $arg == $1 ]]; then continue; fi
+  if [[ $arg == "-r" ]]; then remove=false; continue; fi
+  if [[ $arg == "-np" ]]; then params="-fno-stack-protector -z execstack -no-pie $params"; continue; fi
+  params="$params $arg"
 done
 
 format=$(sed 's|.*\.||' <<< $1)
